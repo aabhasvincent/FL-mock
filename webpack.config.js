@@ -1,6 +1,8 @@
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const  webpack = require('webpack');
+const {writeFile} = require('fs/promises');
+const ReactLoadablePlugin = require('@react-loadable/revised/webpack').ReactLoadablePlugin;
 
 const clientConfig = {
   entry: './src/index.js', //entry point is where we hydrate the AppPage to the DOM
@@ -29,7 +31,17 @@ const clientConfig = {
   plugins: [
     new webpack.DefinePlugin({
       __isBrowser__: "true"
-    })
+    }),
+    new ReactLoadablePlugin({
+      async callback(manifest) {
+        // save the manifest somewhere to be read by the server
+        await writeFile(
+          path.join(__dirname, 'build/react-loadable.json'),
+          JSON.stringify(manifest, null, 2)
+        )
+      },
+      absPath: true,
+    }),
   ]
 }
 
